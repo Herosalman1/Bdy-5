@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Happy Birthday!</title>
+<link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
+<style>
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: radial-gradient(circle at center, #1a1a2e 0%, #06060a 100%);
+    overflow: hidden;
+    font-family: 'Avenir', Helvetica, sans-serif;
+  }
+  
+  /* Start Screen UI */
+  #start-screen {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, #d10877 0%, #d11492 100%); 
+    display: flex; justify-content: center; align-items: center;
+    z-index: 99999; transition: background 0.7s ease, opacity 0.5s ease;
+  }
+  #start-btn-overlay {
+    background: rgba(255, 255, 255, 0.15); color: #ffffff; font-size: 26px;
+    font-family: 'Montserrat', sans-serif; font-weight: 700; padding: 18px 50px;
+    border: 2px solid rgba(255, 255, 255, 0.4); border-radius: 50px; cursor: pointer;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease; letter-spacing: 1px; text-transform: uppercase;
+    animation: pulseGlow 2s infinite; outline: none;
+  }
+  #start-btn-overlay:hover {
+    background: rgba(255, 255, 255, 0.25); border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-5px) scale(1.02); box-shadow: 0 15px 35px 0 rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(255, 255, 255, 0.4); animation: none; 
+  }
+  #start-btn-overlay:active { transform: scale(0.95); }
+  @keyframes pulseGlow {
+    0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4), 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+    70% { box-shadow: 0 0 0 25px rgba(255, 255, 255, 0), 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0), 0 8px 32px 0 rgba(0, 0, 0, 0.3); }
+  }
+  .creator-tag {
+    position: fixed; bottom: 1rem; left: 1rem; color: rgba(255, 255, 255, 0.7);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 14px; text-decoration: none; z-index: 100000; transition: color 0.3s ease, opacity 0.3s ease;
+  }
+  .creator-tag:hover { color: rgb(255, 255, 255); opacity: 1; }
+
+  /* Volume UI */
+  #volume-checkbox { display: none; }
+  .volume-label { height: 44px; width: 44px; position: fixed; bottom: 1rem; right: 1rem; cursor: pointer; z-index: 100000; }
+  .volume-label svg { position: absolute; height: 100%; width: 100%; top: 0; left: 0; fill: #ffffff; opacity: 0.8; }
+  .volume-label:hover svg { opacity: 1; }
+  .volume-label svg:nth-of-type(1) { display: none; }
+  #volume-checkbox:checked ~ .volume-label svg:nth-of-type(1) { display: block; }
+  #volume-checkbox:checked ~ .volume-label svg:nth-of-type(2) { display: none; }
+
+  /* Fireworks Layer */
+  #fwCanvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transition: opacity 1s ease; }
+  .credit {
+    position: fixed; right: 14px; bottom: 10px; font: 13px -apple-system, "Segoe UI", sans-serif;
+    color: rgba(255,255,255,0.2); pointer-events: none; letter-spacing: 1px; z-index: 10; display: none;
+  }
+
+  /* Countdown Layers */
+  #floorCanvas { position: absolute; width: 100%; height: 100%; z-index: 8888; background: #000; top: 0; left: 0; }
+  #particleCanvas { position: absolute; width: 100%; height: 100%; z-index: 9999; top: 0; left: 0; }
+</style>
+</head>
+<body>
+
+  <!-- Background Music -->
+  <audio id="bgMusic" loop>
+    <source src="https://res.cloudinary.com/qvbwofki/video/upload/v1787425257/Tujh_Bin_Instrumental_Bharatt-Saurabh.m4a">
+  </audio>
+
+  <!-- Start Screen -->
+  <div id="start-screen">
+    <button id="start-btn-overlay">🎉 CLICK HERE 😁👆</button>
+    <a href="https://www.instagram.com/herosalman1_929/" target="_blank" class="creator-tag">Made by : @Herosalman1</a>
+    <input id="volume-checkbox" type="checkbox" checked/>
+    <label for="volume-checkbox" title="Toggle sound" class="volume-label">
+      <svg viewBox="0 0 24 24"><path d="M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z"></path></svg>
+      <svg viewBox="0 0 24 24"><path d="M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12M16.5,12C16.5,10.23 15.5,8.71 14,7.97V10.18L16.45,12.63C16.5,12.43 16.5,12.21 16.5,12Z"></path></svg>
+    </label>
+  </div>
+
+  <!-- Layers -->
+  <canvas id="fwCanvas"></canvas>
+  <div class="credit" id="fwCredit">happy birthday</div>
+  <canvas id="floorCanvas"></canvas>
+  <canvas id="particleCanvas" class="canvas"></canvas>
+
+  <script>
+    // --- 1. START SCREEN & GLOBAL AUDIO LOGIC ---
+    const startBtnOverlay = document.getElementById('start-btn-overlay');
+    const startScreen = document.getElementById('start-screen');
+    const bgAudio = document.getElementById('bgMusic');
+    const volumeCheckbox = document.getElementById('volume-checkbox');
+
+    startBtnOverlay.addEventListener('click', () => {
+      bgAudio.muted = !volumeCheckbox.checked;
+      bgAudio.play().catch(e => console.log('Audio Blocked:', e));
+
+      startBtnOverlay.style.display = 'none';
+      document.querySelector('.creator-tag').style.display = 'none';
+      document.querySelector('.volume-label').style.display = 'none';
+      startScreen.style.background = '#000000'; 
+      
+      setTimeout(() => {
+        startScreen.style.opacity = '0';
+        setTimeout(() => {
+          startScreen.style.display = 'none';
+          initFloor(); 
+          S.init(); 
+        }, 500); 
+      }, 300); 
+    });
+
+    volumeCheckbox.addEventListener('change', (e) => {
+      bgAudio.muted = !e.target.checked;
+    });
+
+    // --- 2. 3D FLOOR BACKGROUND (For 5,4,3,2,1, GO Phase) ---
+    let fCanvas, fCtx, pi, cx, cy, playerZ, playerX, playerY, pitch, yaw, scale, frames, floorAnimId;
+    function initFloorVars() {
+        pi = Math.PI; fCanvas = document.getElementById("floorCanvas"); fCtx = fCanvas.getContext("2d"); 
+        fCanvas.width = fCanvas.clientWidth; fCanvas.height = fCanvas.clientHeight; 
+        cx = fCanvas.width / 2; cy = fCanvas.height / 2; 
+        playerZ = -25; playerX = playerY = pitch = yaw = 0; scale = 600; frames = 0;
+    }
+    function rasterizePoint(x, y, z) {
+        var p, d; x -= playerX; y -= playerY; z -= playerZ; p = Math.atan2(x, z); d = Math.sqrt(x * x + z * z); 
+        x = Math.sin(p - yaw) * d; z = Math.cos(p - yaw) * d; p = Math.atan2(y, z); d = Math.sqrt(y * y + z * z); 
+        y = Math.sin(p - pitch) * d; z = Math.cos(p - pitch) * d;
+        var rx1 = -1000, ry1 = 1, rx2 = 1000, ry2 = 1, rx3 = 0, ry3 = 0, rx4 = x, ry4 = z, uc = (ry4 - ry3) * (rx2 - rx1) - (rx4 - rx3) * (ry2 - ry1);
+        if (!uc) return { x: 0, y: 0, d: -1 };
+        var ua = ((rx4 - rx3) * (ry1 - ry3) - (ry4 - ry3) * (rx1 - rx3)) / uc; var ub = ((rx2 - rx1) * (ry1 - ry3) - (ry2 - ry1) * (rx1 - rx3)) / uc;
+        if (!z) z = .000000001;
+        if (ua > 0 && ua < 1 && ub > 0 && ub < 1) return { x: cx + (rx1 + ua * (rx2 - rx1)) * scale, y: cy + y / z * scale, d: Math.sqrt(x * x + y * y + z * z) };
+        else return { x: cx + (rx1 + ua * (rx2 - rx1)) * scale, y: cy + y / z * scale, d: -1 };
+    }
+    function doLogic() { p = Math.atan2(playerX, playerZ); d = Math.sqrt(playerX * playerX + playerZ * playerZ); d += Math.sin(frames / 80) / 1.25; t = Math.sin(frames / 200) / 40; playerX = Math.sin(p + t) * d; playerZ = Math.cos(p + t) * d; yaw = pi + p + t; }
+    function drawFloor() {
+        fCtx.clearRect(0, 0, cx * 2, cy * 2); fCtx.fillStyle = "#ff8"; 
+        for (let i = -100; i < 100; i += 3) {
+            for (let j = -100; j < 100; j += 4) {
+                let x = i, z = j, y = 25; let point = rasterizePoint(x, y, z);
+                if (point.d != -1) { let size = 250 / (1 + point.d); d = Math.sqrt(x * x + z * z); a = 0.75 - Math.pow(d / 100, 6) * 0.75; if (a > 0) { fCtx.globalAlpha = a; fCtx.fillRect(point.x - size / 2, point.y - size / 2, size, size); } }
+            }
+        }
+        fCtx.globalAlpha = 1;
+    }
+    function frameFloor() { if (frames > 100000) frames = 0; frames++; drawFloor(); doLogic(); floorAnimId = requestAnimationFrame(frameFloor); }
+    window.addEventListener("resize", () => { if(fCanvas){ fCanvas.width = fCanvas.clientWidth; fCanvas.height = fCanvas.clientHeight; cx = fCanvas.width / 2; cy = fCanvas.height / 2; }});
+    function initFloor() { initFloorVars(); frameFloor(); }
+
+    // --- 3. PARTICLE TEXT (5,4,3,2,1, GO) LOGIC ---
+    var S = {
+        init: function () {
+            S.Drawing.init('#particleCanvas');
+            S.UI.simulate("5|4|3|2|1|SURPRISE");
+            S.Drawing.loop(function () { S.Shape.render(); });
+        }
+    };
+    S.Drawing = (function () {
+        var canvas, context, renderFn, requestFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame || function (callback) { window.setTimeout(callback, 1000 / 60); };
+        return {
+            init: function (el) { canvas = document.querySelector(el); context = canvas.getContext('2d'); this.adjustCanvas(); window.addEventListener('resize', function (e) { S.Drawing.adjustCanvas(); }); },
+            loop: function (fn) { renderFn = !renderFn ? fn : renderFn; this.clearFrame(); renderFn(); requestFrame.call(window, this.loop.bind(this)); },
+            adjustCanvas: function () { canvas.width = window.innerWidth; canvas.height = window.innerHeight; },
+            clearFrame: function () { context.clearRect(0, 0, canvas.width, canvas.height); },
+            getArea: function () { return { w: canvas.width, h: canvas.height }; },
+            drawCircle: function (p, c) { if (p.a <= 0.01) return; context.fillStyle = c.render(); context.beginPath(); context.arc(p.x, p.y, Math.max(0.1, p.z), 0, 2 * Math.PI, true); context.closePath(); context.fill(); }
+        }
+    }());
+    S.UI = (function () {
+        var interval, sequence = [];
+        function timedAction(fn, delay) { clearInterval(interval); fn(); interval = setInterval(function () { fn(); }, delay); }
+        function performAction(value) {
+            var current; sequence = typeof (value) === 'object' ? value : sequence.concat(value.split('|'));
+            timedAction(function () {
+                current = sequence.shift();
+                if (current !== undefined) {
+                    S.Shape.switchShape(S.ShapeBuilder.letter(current));
+                } else {
+                    // COUNTDOWN KHATAM: FADE IN BLACK SCREEN AUR PHIR FIREWORKS START
+                    clearInterval(interval);
+                    let fCnv = document.getElementById('floorCanvas');
+                    let pCnv = document.getElementById('particleCanvas');
+                    fCnv.style.transition = "opacity 1s ease"; fCnv.style.opacity = "0";
+                    pCnv.style.transition = "opacity 1s ease"; pCnv.style.opacity = "0";
+                    
+                    setTimeout(() => {
+                        cancelAnimationFrame(floorAnimId);
+                        fCnv.style.display = "none"; pCnv.style.display = "none";
+                        document.getElementById('fwCredit').style.display = "block";
+                        
+                        // FIREWORKS FADE IN
+                        let fwC = document.getElementById('fwCanvas');
+                        fwC.style.opacity = "1";
+                        initFireworks(); 
+                    }, 1000);
+                }
+            }, 1800);
+        }
+        return { simulate: function (action) { performAction(action); } }
+    }());
+    S.Point = function (args) { this.x = args.x; this.y = args.y; this.z = args.z; this.a = args.a; this.h = args.h; };
+    S.Color = function (r, g, b, a) { this.r = r; this.g = g; this.b = b; this.a = a; };
+    S.Color.prototype = { render: function () { return 'rgba(' + this.r + ',' + this.g + ',' + this.b + ',' + Math.max(0, this.a) + ')'; } };
+    S.Dot = function (x, y) { this.p = new S.Point({ x: x, y: y, z: 5, a: 1, h: 0 }); this.e = 0.07; this.s = true; this.c = new S.Color(255, 255, 255, this.p.a); this.t = this.clone(); this.q = []; };
+    S.Dot.prototype = {
+        clone: function () { return new S.Point({ x: this.x, y: this.y, z: this.z, a: this.a, h: this.h }); },
+        _draw: function () { this.c.a = this.p.a; S.Drawing.drawCircle(this.p, this.c); },
+        _moveTowards: function (n) {
+            var details = this.distanceTo(n, true), dx = details[0], dy = details[1], d = details[2], e = this.e * d;
+            if (this.p.h === -1) { this.p.x = n.x; this.p.y = n.y; return true; }
+            if (d > 1) { this.p.x -= ((dx / d) * e); this.p.y -= ((dy / d) * e); } else { if (this.p.h > 0) { this.p.h--; } else { return true; } } return false;
+        },
+        _update: function () {
+            if (this._moveTowards(this.t)) {
+                var p = this.q.shift();
+                if (p) { this.t.x = p.x || this.p.x; this.t.y = p.y || this.p.y; this.t.z = p.z || this.p.z; this.t.a = p.a || this.p.a; this.p.h = p.h || 0; }
+                else { if (this.s) { this.p.x -= Math.sin(Math.random() * 3.142) * 0.2; this.p.y -= Math.sin(Math.random() * 3.142) * 0.2; } }
+            }
+            var d = this.p.a - this.t.a; this.p.a = Math.max(0, this.p.a - (d * 0.08)); d = this.p.z - this.t.z; this.p.z = Math.max(0.1, this.p.z - (d * 0.08));
+        },
+        distanceTo: function (n, details) { var dx = this.p.x - n.x, dy = this.p.y - n.y, d = Math.sqrt(dx * dx + dy * dy); return details ? [dx, dy, d] : d; },
+        move: function (p, avoidStatic) { if (!avoidStatic || (avoidStatic && this.distanceTo(p) > 1)) { this.q.push(p); } },
+        render: function () { this._update(); this._draw(); }
+    }
+    S.ShapeBuilder = (function () {
+        var gap = 13, shapeCanvas = document.createElement('canvas'), shapeContext = shapeCanvas.getContext('2d'), fontSize = 500, fontFamily = 'Avenir, Helvetica Neue, Helvetica, Arial, sans-serif';
+        function fit() { shapeCanvas.width = Math.floor(window.innerWidth / gap) * gap; shapeCanvas.height = Math.floor(window.innerHeight / gap) * gap; shapeContext.fillStyle = 'red'; shapeContext.textBaseline = 'middle'; shapeContext.textAlign = 'center'; }
+        function processCanvas() {
+            var pixels = shapeContext.getImageData(0, 0, shapeCanvas.width, shapeCanvas.height).data; var dots = [], x = 0, y = 0, fx = shapeCanvas.width, fy = shapeCanvas.height, w = 0, h = 0;
+            for (var p = 0; p < pixels.length; p += (4 * gap)) {
+                if (pixels[p + 3] > 0) { dots.push(new S.Point({ x: x, y: y })); w = x > w ? x : w; h = y > h ? y : h; fx = x < fx ? x : fx; fy = y < fy ? y : fy; }
+                x += gap; if (x >= shapeCanvas.width) { x = 0; y += gap; p += gap * 4 * shapeCanvas.width; }
+            }
+            return { dots: dots, w: w + fx, h: h + fy };
+        }
+        function setFontSize(s) { shapeContext.font = 'bold ' + s + 'px ' + fontFamily; }
+        function isNumber(n) { return !isNaN(parseFloat(n)) && isFinite(n); }
+        function init() { fit(); window.addEventListener('resize', fit); }
+        init();
+        return {
+            letter: function (l) {
+                var s = 0; setFontSize(fontSize); s = Math.min(fontSize, (shapeCanvas.width / shapeContext.measureText(l).width) * 0.8 * fontSize, (shapeCanvas.height / fontSize) * (isNumber(l) ? 1 : 0.45) * fontSize); setFontSize(s);
+                shapeContext.clearRect(0, 0, shapeCanvas.width, shapeCanvas.height); shapeContext.fillText(l, shapeCanvas.width / 2, shapeCanvas.height / 2); return processCanvas();
+            }
+        };
+    }());
+    S.Shape = (function () {
+        var dots = [], width = 0, height = 0, cx = 0, cy = 0;
+        function compensate() { var a = S.Drawing.getArea(); cx = a.w / 2 - width / 2; cy = a.h / 2 - height / 2; }
+        return {
+            switchShape: function (n, fast) {
+                var a = S.Drawing.getArea(); width = n.w; height = n.h; compensate();
+                if (n.dots.length > dots.length) { var size = n.dots.length - dots.length; for (var d = 1; d <= size; d++) { dots.push(new S.Dot(a.w / 2, a.h / 2)); } }
+                var d = 0, i = 0;
+                while (n.dots.length > 0) {
+                    i = Math.floor(Math.random() * n.dots.length);
+                    dots[d].e = fast ? 0.25 : 0.12; dots[d].s = true; dots[d].move(new S.Point({ x: n.dots[i].x + cx, y: n.dots[i].y + cy, a: 1, z: 5, h: 0 }));
+                    n.dots = n.dots.slice(0, i).concat(n.dots.slice(i + 1)); d++;
+                }
+                for (var j = d; j < dots.length; j++) { dots[j].s = false; dots[j].e = 0.15; dots[j].move(new S.Point({ x: dots[j].p.x, y: dots[j].p.y, a: 0, z: 0.1, h: 0 })); }
+            },
+            render: function () { for (var d = 0; d < dots.length; d++) { dots[d].render(); } }
+        }
+    }());
+
+    // --- 4. FIREWORK BALLOONS LOGIC & AUTO RE-AGAIN RESTART ---
+    const fwCanvas = document.getElementById('fwCanvas');
+    const fwCtx = fwCanvas.getContext('2d');
+    let W, H, DPR;
+    let animationRunning = false;
+    let fwAnimFrameId;
+
+    function resizeFw() {
+      DPR = Math.min(window.devicePixelRatio || 1, 2);
+      W = window.innerWidth; H = window.innerHeight;
+      fwCanvas.width = W * DPR; fwCanvas.height = H * DPR;
+      fwCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      layoutFw();
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let friendName = urlParams.get('name');
+    if (!friendName) friendName = "FRIEND";
+    const LINES = ["HAPPY", "BIRTHDAY!", `TO YOU DEAR, ${friendName.toUpperCase()}`];
+    let letters = [];
+
+    function fontForLine(i) {
+      const big = Math.min(W * 0.11, 64);
+      const small = big * 0.62;
+      return `900 ${i < 2 ? big : small}px "Arial Rounded MT Bold", "Segoe UI", sans-serif`;
+    }
+
+    function layoutFw() {
+      letters = [];
+      const lineHeight = Math.min(W * 0.13, 78);
+      const totalHeight = lineHeight * LINES.length;
+      let startY = H / 2 - totalHeight / 2 + lineHeight * 0.7;
+      let idx = 0;
+      const GOLDEN_ANGLE = 137.508; 
+
+      LINES.forEach((line, li) => {
+        fwCtx.font = fontForLine(li);
+        const totalWidth = fwCtx.measureText(line).width;
+        let cx = W / 2 - totalWidth / 2;
+        const y = startY + li * lineHeight;
+
+        [...line].forEach((char) => {
+          const w = fwCtx.measureText(char).width;
+          if (char !== " ") {
+            const hue = (idx * GOLDEN_ANGLE) % 360;
+            letters.push(new Letter(char, cx + w / 2, y, hue, fontForLine(li)));
+            idx++;
+          }
+          cx += w;
+        });
+      });
+    }
+
+    function Letter(char, x, y, hue, font) {
+      this.char = char; this.x = x; this.y = y; this.hue = hue; this.font = font;
+      this.color = `hsl(${hue}, 85%, 62%)`; this.lightColor = `hsl(${hue}, 95%, 80%)`;
+      this.glowColor = `hsla(${hue}, 90%, 60%, 0.6)`; this.reset(true);
+    }
+
+    Letter.prototype.reset = function (first) {
+      this.phase = "firework"; this.tick = 0; this.spawnDelay = (first ? 0 : 30) + Math.random() * 55;
+      this.rocketY = H + 30; this.rocketX = this.x + (Math.random() - 0.5) * 30;
+      this.trail = []; this.sparks = []; this.balloonRise = 0; this.alpha = 1; this.holdFrames = 120; 
+    };
+
+    Letter.prototype.update = function () {
+      switch (this.phase) {
+        case "firework": {
+          this.tick++; if (this.tick < this.spawnDelay) return;
+          this.trail.push({ x: this.rocketX, y: this.rocketY, alpha: 1 });
+          if (this.trail.length > 14) this.trail.shift();
+          this.rocketY -= 9.5; this.rocketX += Math.sin(this.tick * 0.4) * 0.6;
+
+          fwCtx.save(); fwCtx.shadowBlur = 10; fwCtx.shadowColor = this.lightColor;
+          this.trail.forEach((p, i) => {
+            const a = (i / this.trail.length) * 0.6; fwCtx.fillStyle = `hsla(${this.hue}, 90%, 65%, ${a})`;
+            fwCtx.beginPath(); fwCtx.arc(p.x, p.y, 2.5, 0, Math.PI * 2); fwCtx.fill();
+          });
+          fwCtx.fillStyle = this.lightColor; fwCtx.beginPath(); fwCtx.arc(this.rocketX, this.rocketY, 3.5, 0, Math.PI * 2); fwCtx.fill(); fwCtx.restore();
+
+          if (this.rocketY <= this.y) {
+            this.phase = "explode"; this.tick = 0; const n = 24; 
+            for (let i = 0; i < n; i++) {
+              const angle = (Math.PI * 2 * i) / n + Math.random() * 0.4;
+              const speed = 1.5 + Math.random() * 3.5;
+              this.sparks.push({ x: this.x, y: this.y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed, alpha: 1 });
+            }
+          }
+          return;
+        }
+        case "explode": {
+          this.tick++; fwCtx.save(); fwCtx.shadowBlur = 12; fwCtx.shadowColor = this.glowColor;
+          this.sparks.forEach((s) => {
+            s.x += s.vx; s.y += s.vy; s.vy += 0.06; s.alpha -= 0.025; 
+            if (s.alpha > 0) {
+              fwCtx.fillStyle = `hsla(${this.hue}, 90%, 65%, ${s.alpha})`; fwCtx.beginPath(); fwCtx.arc(s.x, s.y, 2.5, 0, Math.PI * 2); fwCtx.fill();
+            }
+          });
+          fwCtx.restore();
+
+          if (this.tick > 8) {
+            fwCtx.save(); fwCtx.globalAlpha = Math.min(1, (this.tick - 8) / 15); fwCtx.fillStyle = this.color;
+            fwCtx.font = this.font; fwCtx.textAlign = "center"; fwCtx.textBaseline = "alphabetic";
+            fwCtx.shadowBlur = 15; fwCtx.shadowColor = this.glowColor; fwCtx.fillText(this.char, this.x, this.y); fwCtx.restore();
+          }
+          if (this.tick > 36) { this.phase = "text"; this.tick = 0; }
+          return;
+        }
+        case "text": {
+          this.tick++; fwCtx.save(); fwCtx.fillStyle = this.color; fwCtx.font = this.font;
+          fwCtx.textAlign = "center"; fwCtx.shadowBlur = 20; fwCtx.shadowColor = this.glowColor;
+          fwCtx.fillText(this.char, this.x, this.y); fwCtx.restore();
+          if (this.tick > this.holdFrames) { this.phase = "balloon"; this.tick = 0; }
+          return;
+        }
+        case "balloon": {
+          this.tick++; this.balloonRise += 1.8 + this.tick * 0.05; 
+          const letterY = this.y - this.balloonRise; const fadeStart = H * 0.08;
+          if (letterY < fadeStart) { this.alpha = Math.max(0, letterY / fadeStart); }
+          const balloonCenterY = letterY - 70; const stringTopY = balloonCenterY + 11;
+
+          fwCtx.save(); fwCtx.globalAlpha = this.alpha; fwCtx.strokeStyle = `hsla(${this.hue}, 30%, 70%, 0.7)`; fwCtx.lineWidth = 1.5;
+          fwCtx.beginPath(); fwCtx.moveTo(this.x, stringTopY); const midY = (stringTopY + (letterY - 8)) / 2;
+          fwCtx.quadraticCurveTo(this.x + Math.sin(this.tick * 0.05) * 6, midY, this.x + Math.sin(this.tick * 0.05) * 3, letterY - 8); fwCtx.stroke();
+          
+          fwCtx.shadowBlur = 15; fwCtx.shadowColor = this.glowColor; fwCtx.fillStyle = this.color;
+          fwCtx.beginPath(); fwCtx.ellipse(this.x, balloonCenterY, 10, 13, 0, 0, Math.PI * 2); fwCtx.fill();
+          fwCtx.beginPath(); fwCtx.moveTo(this.x - 3, balloonCenterY + 11.5); fwCtx.lineTo(this.x + 3, balloonCenterY + 11.5);
+          fwCtx.lineTo(this.x, balloonCenterY + 16); fwCtx.closePath(); fwCtx.fill();
+
+          fwCtx.shadowBlur = 0; fwCtx.fillStyle = "rgba(255,255,255,0.4)";
+          fwCtx.beginPath(); fwCtx.ellipse(this.x - 3.5, balloonCenterY - 4.5, 2.5, 4, -0.4, 0, Math.PI * 2); fwCtx.fill();
+
+          fwCtx.fillStyle = this.color; fwCtx.font = this.font; fwCtx.textAlign = "center";
+          fwCtx.shadowBlur = 10; fwCtx.shadowColor = this.glowColor; fwCtx.fillText(this.char, this.x, letterY); fwCtx.restore();
+
+          if (letterY < -60 || this.alpha <= 0.01) { 
+            this.phase = "done"; // Stop rendering this balloon
+            
+            // Only trigger fade to black once
+            if (!window.isFadingToBlack) {
+              window.isFadingToBlack = true;
+              
+              // Wait 3 seconds after balloon is out of screen
+              setTimeout(() => {
+                const blackScreen = document.createElement('div');
+                blackScreen.style.position = 'fixed';
+                blackScreen.style.top = '0';
+                blackScreen.style.left = '0';
+                blackScreen.style.width = '100vw';
+                blackScreen.style.height = '100vh';
+                blackScreen.style.backgroundColor = 'black';
+                blackScreen.style.zIndex = '9999999';
+                blackScreen.style.opacity = '0';
+                blackScreen.style.transition = 'opacity 2.5s ease'; 
+                document.body.appendChild(blackScreen);
+                
+                requestAnimationFrame(() => {
+                  blackScreen.style.opacity = '1';
+                });
+
+                // Reload page after fade finishes
+                setTimeout(() => {
+                  window.location.reload(); 
+                }, 2500); 
+              }, 2500); // 1-second delay
+            }
+          }
+          return;
+        }
+        case "done":
+          return;
+      }
+    };
+
+    function animateFw() {
+      if(!animationRunning) return;
+      fwCtx.clearRect(0, 0, W, H);
+      letters.forEach((l) => l.update());
+      fwAnimFrameId = requestAnimationFrame(animateFw);
+    }
+
+    function initFireworks() {
+      animationRunning = true;
+      window.addEventListener("resize", resizeFw);
+      resizeFw(); 
+      animateFw();
+    }
+  </script>
+</body>
+</html>
