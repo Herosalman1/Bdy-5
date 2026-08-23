@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Happy Birthday!</title>
 <link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
 <style>
@@ -71,7 +72,7 @@
 
   <!-- Start Screen -->
   <div id="start-screen">
-    <button id="start-btn-overlay">🎉 CLICK HERE 😁👆</button>
+    <button id="start-btn-overlay">✨ CLICK HERE 🎁</button>
     <a href="https://www.instagram.com/herosalman1_929/" target="_blank" class="creator-tag">Made by : @Herosalman1</a>
     <input id="volume-checkbox" type="checkbox" checked/>
     <label for="volume-checkbox" title="Toggle sound" class="volume-label">
@@ -149,7 +150,7 @@
     window.addEventListener("resize", () => { if(fCanvas){ fCanvas.width = fCanvas.clientWidth; fCanvas.height = fCanvas.clientHeight; cx = fCanvas.width / 2; cy = fCanvas.height / 2; }});
     function initFloor() { initFloorVars(); frameFloor(); }
 
-    // --- 3. PARTICLE TEXT (5,4,3,2,1, GO) LOGIC ---
+    // --- 3. PARTICLE TEXT (5,4,3,2,1, SURPRISE) LOGIC ---
     var S = {
         init: function () {
             S.Drawing.init('#particleCanvas');
@@ -178,7 +179,7 @@
                 if (current !== undefined) {
                     S.Shape.switchShape(S.ShapeBuilder.letter(current));
                 } else {
-                    // COUNTDOWN KHATAM: FADE IN BLACK SCREEN AUR PHIR FIREWORKS START
+                    // COUNTDOWN OVER: FADE IN BLACK SCREEN AUR FIREWORKS START
                     clearInterval(interval);
                     let fCnv = document.getElementById('floorCanvas');
                     let pCnv = document.getElementById('particleCanvas');
@@ -264,7 +265,7 @@
         }
     }());
 
-    // --- 4. FIREWORK BALLOONS LOGIC & AUTO RE-AGAIN RESTART ---
+    // --- 4. FIREWORK BALLOONS LOGIC (UPDATED 3 LINES STRUCTURE) ---
     const fwCanvas = document.getElementById('fwCanvas');
     const fwCtx = fwCanvas.getContext('2d');
     let W, H, DPR;
@@ -281,35 +282,40 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     let friendName = urlParams.get('name');
-    if (!friendName) friendName = "FRIEND";
-    const LINES = ["HAPPY", "BIRTHDAY!", `TO YOU DEAR, ${friendName.toUpperCase()}`];
+    if (!friendName) friendName = "DIYA SING"; // Default set to DIYA SING
+
+    // EXACT 3 LINES FORMAT LIKE THE IMAGE
+    const LINES = [
+      "HAPPY BIRTHDAY",
+      "TO YOU",
+      `DEAR, ${friendName.toUpperCase()}`
+    ];
     let letters = [];
 
     function fontForLine(i) {
-      const big = Math.min(W * 0.11, 64);
-      const small = big * 0.62;
-      return `900 ${i < 2 ? big : small}px "Arial Rounded MT Bold", "Segoe UI", sans-serif`;
+      // Responsive dynamic font size
+      const baseSize = Math.min(W * 0.085, 48);
+      return `900 ${baseSize}px "Arial Rounded MT Bold", "Montserrat", "Segoe UI", sans-serif`;
     }
 
     function layoutFw() {
       letters = [];
-      const lineHeight = Math.min(W * 0.13, 78);
-      const totalHeight = lineHeight * LINES.length;
-      let startY = H / 2 - totalHeight / 2 + lineHeight * 0.7;
+      const lineHeight = Math.min(W * 0.12, 65);
+      const totalHeight = lineHeight * (LINES.length - 1);
+      let startY = (H / 2) - (totalHeight / 2);
       let idx = 0;
       const GOLDEN_ANGLE = 137.508; 
 
       LINES.forEach((line, li) => {
         fwCtx.font = fontForLine(li);
         const totalWidth = fwCtx.measureText(line).width;
-        let cx = W / 2 - totalWidth / 2;
-        const y = startY + li * lineHeight;
+        let cx = (W / 2) - (totalWidth / 2);
+        const y = startY + (li * lineHeight);
 
         [...line].forEach((char) => {
           const w = fwCtx.measureText(char).width;
           if (char !== " ") {
             const hue = (idx * GOLDEN_ANGLE) % 360;
-            // Pass line index (li) and global index (idx) to control delay
             letters.push(new Letter(char, cx + w / 2, y, hue, fontForLine(li), li, idx));
             idx++;
           }
@@ -327,12 +333,12 @@
     }
 
     Letter.prototype.reset = function (first) {
-      this.phase = "firework"; this.tick = 0; this.spawnDelay = (first ? 0 : 30) + Math.random() * 55;
+      this.phase = "firework"; this.tick = 0; this.spawnDelay = (first ? 0 : 30) + Math.random() * 45;
       this.rocketY = H + 30; this.rocketX = this.x + (Math.random() - 0.5) * 30;
       this.trail = []; this.sparks = []; this.balloonRise = 0; this.alpha = 1; 
       
-      // Delay balloons: 120 (base frames) + 60 frames (~1 sec) per line + 10 frames per letter staggered
-      this.holdFrames = 120 + (this.lineIndex * 60) + (this.globalIndex * 10); 
+      // Delay balloon fly-up timing
+      this.holdFrames = 130 + (this.lineIndex * 40) + (this.globalIndex * 6); 
     };
 
     Letter.prototype.update = function () {
@@ -406,7 +412,6 @@
           fwCtx.fillStyle = this.color; fwCtx.font = this.font; fwCtx.textAlign = "center";
           fwCtx.shadowBlur = 10; fwCtx.shadowColor = this.glowColor; fwCtx.fillText(this.char, this.x, letterY); fwCtx.restore();
 
-          // Stop rendering this balloon if it flew off screen
           if (letterY < -60 || this.alpha <= 0.01) { 
             this.phase = "done"; 
           }
@@ -429,7 +434,6 @@
         }
       });
 
-      // Once ALL balloons are done, start the fade to black
       if (allDone && !window.isFadingToBlack) {
         window.isFadingToBlack = true;
         
@@ -450,7 +454,6 @@
             blackScreen.style.opacity = '1';
           });
 
-          // Reload page after fade finishes
           setTimeout(() => {
             window.location.reload(); 
           }, 2500); 
