@@ -56,10 +56,6 @@
 
   /* Fireworks Layer */
   #fwCanvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 1; opacity: 0; transition: opacity 1s ease; }
-  .credit {
-    position: fixed; right: 14px; bottom: 10px; font: 13px -apple-system, "Segoe UI", sans-serif;
-    color: rgba(255,255,255,0.2); pointer-events: none; letter-spacing: 1px; z-index: 10; display: none;
-  }
 
   /* Countdown Layers */
   #floorCanvas { position: absolute; width: 100%; height: 100%; z-index: 8888; background: #000; top: 0; left: 0; }
@@ -86,7 +82,6 @@
 
   <!-- Layers -->
   <canvas id="fwCanvas"></canvas>
-  <div class="credit" id="fwCredit">happy birthday</div>
   <canvas id="floorCanvas"></canvas>
   <canvas id="particleCanvas" class="canvas"></canvas>
 
@@ -193,7 +188,6 @@
                     setTimeout(() => {
                         cancelAnimationFrame(floorAnimId);
                         fCnv.style.display = "none"; pCnv.style.display = "none";
-                        document.getElementById('fwCredit').style.display = "block";
                         
                         // FIREWORKS FADE IN
                         let fwC = document.getElementById('fwCanvas');
@@ -315,7 +309,8 @@
           const w = fwCtx.measureText(char).width;
           if (char !== " ") {
             const hue = (idx * GOLDEN_ANGLE) % 360;
-            letters.push(new Letter(char, cx + w / 2, y, hue, fontForLine(li)));
+            // Pass line index (li) and global index (idx) to control delay
+            letters.push(new Letter(char, cx + w / 2, y, hue, fontForLine(li), li, idx));
             idx++;
           }
           cx += w;
@@ -323,8 +318,10 @@
       });
     }
 
-    function Letter(char, x, y, hue, font) {
+    function Letter(char, x, y, hue, font, lineIndex, globalIndex) {
       this.char = char; this.x = x; this.y = y; this.hue = hue; this.font = font;
+      this.lineIndex = lineIndex || 0;
+      this.globalIndex = globalIndex || 0;
       this.color = `hsl(${hue}, 85%, 62%)`; this.lightColor = `hsl(${hue}, 95%, 80%)`;
       this.glowColor = `hsla(${hue}, 90%, 60%, 0.6)`; this.reset(true);
     }
@@ -332,7 +329,10 @@
     Letter.prototype.reset = function (first) {
       this.phase = "firework"; this.tick = 0; this.spawnDelay = (first ? 0 : 30) + Math.random() * 55;
       this.rocketY = H + 30; this.rocketX = this.x + (Math.random() - 0.5) * 30;
-      this.trail = []; this.sparks = []; this.balloonRise = 0; this.alpha = 1; this.holdFrames = 120; 
+      this.trail = []; this.sparks = []; this.balloonRise = 0; this.alpha = 1; 
+      
+      // Delay balloons: 120 (base frames) + 60 frames (~1 sec) per line + 10 frames per letter staggered
+      this.holdFrames = 120 + (this.lineIndex * 60) + (this.globalIndex * 10); 
     };
 
     Letter.prototype.update = function () {
@@ -406,37 +406,9 @@
           fwCtx.fillStyle = this.color; fwCtx.font = this.font; fwCtx.textAlign = "center";
           fwCtx.shadowBlur = 10; fwCtx.shadowColor = this.glowColor; fwCtx.fillText(this.char, this.x, letterY); fwCtx.restore();
 
+          // Stop rendering this balloon if it flew off screen
           if (letterY < -60 || this.alpha <= 0.01) { 
-            this.phase = "done"; // Stop rendering this balloon
-            
-            // Only trigger fade to black once
-            if (!window.isFadingToBlack) {
-              window.isFadingToBlack = true;
-              
-              // Wait 3 seconds after balloon is out of screen
-              setTimeout(() => {
-                const blackScreen = document.createElement('div');
-                blackScreen.style.position = 'fixed';
-                blackScreen.style.top = '0';
-                blackScreen.style.left = '0';
-                blackScreen.style.width = '100vw';
-                blackScreen.style.height = '100vh';
-                blackScreen.style.backgroundColor = 'black';
-                blackScreen.style.zIndex = '9999999';
-                blackScreen.style.opacity = '0';
-                blackScreen.style.transition = 'opacity 2.5s ease'; 
-                document.body.appendChild(blackScreen);
-                
-                requestAnimationFrame(() => {
-                  blackScreen.style.opacity = '1';
-                });
-
-                // Reload page after fade finishes
-                setTimeout(() => {
-                  window.location.reload(); 
-                }, 2500); 
-              }, 2000); // 1-second delay
-            }
+            this.phase = "done"; 
           }
           return;
         }
@@ -448,7 +420,43 @@
     function animateFw() {
       if(!animationRunning) return;
       fwCtx.clearRect(0, 0, W, H);
-      letters.forEach((l) => l.update());
+      
+      let allDone = true;
+      letters.forEach((l) => {
+        l.update();
+        if(l.phase !== "done") {
+          allDone = false;
+        }
+      });
+
+      // Once ALL balloons are done, start the fade to black
+      if (allDone && !window.isFadingToBlack) {
+        window.isFadingToBlack = true;
+        
+        setTimeout(() => {
+          const blackScreen = document.createElement('div');
+          blackScreen.style.position = 'fixed';
+          blackScreen.style.top = '0';
+          blackScreen.style.left = '0';
+          blackScreen.style.width = '100vw';
+          blackScreen.style.height = '100vh';
+          blackScreen.style.backgroundColor = 'black';
+          blackScreen.style.zIndex = '9999999';
+          blackScreen.style.opacity = '0';
+          blackScreen.style.transition = 'opacity 2.5s ease'; 
+          document.body.appendChild(blackScreen);
+          
+          requestAnimationFrame(() => {
+            blackScreen.style.opacity = '1';
+          });
+
+          // Reload page after fade finishes
+          setTimeout(() => {
+            window.location.reload(); 
+          }, 2500); 
+        }, 1000); 
+      }
+
       fwAnimFrameId = requestAnimationFrame(animateFw);
     }
 
