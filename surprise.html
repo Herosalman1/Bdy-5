@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- YAHI WO LINE HAI JO AUTO DESKTOP SITE ON KAREGI MOBILE MEIN -->
+<meta name="viewport" content="width=1200">
 <title>Happy Birthday!</title>
 <link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
 <style>
@@ -149,7 +150,7 @@
     window.addEventListener("resize", () => { if(fCanvas){ fCanvas.width = fCanvas.clientWidth; fCanvas.height = fCanvas.clientHeight; cx = fCanvas.width / 2; cy = fCanvas.height / 2; }});
     function initFloor() { initFloorVars(); frameFloor(); }
 
-    // --- 3. PARTICLE TEXT (SURPRISE DOTS FIXED FOR READABILITY) ---
+    // --- 3. PARTICLE TEXT (100% ORIGINAL SCRIPT) ---
     var S = {
         init: function () {
             S.Drawing.init('#particleCanvas');
@@ -223,13 +224,7 @@
     }
     S.ShapeBuilder = (function () {
         var gap = 13, shapeCanvas = document.createElement('canvas'), shapeContext = shapeCanvas.getContext('2d'), fontSize = 500, fontFamily = 'Avenir, Helvetica Neue, Helvetica, Arial, sans-serif';
-        function fit() { 
-            // Fix for Particle Dots readability on smaller screens
-            gap = window.innerWidth < 600 ? 6 : 12;
-            shapeCanvas.width = Math.floor(window.innerWidth / gap) * gap; 
-            shapeCanvas.height = Math.floor(window.innerHeight / gap) * gap; 
-            shapeContext.fillStyle = 'red'; shapeContext.textBaseline = 'middle'; shapeContext.textAlign = 'center'; 
-        }
+        function fit() { shapeCanvas.width = Math.floor(window.innerWidth / gap) * gap; shapeCanvas.height = Math.floor(window.innerHeight / gap) * gap; shapeContext.fillStyle = 'red'; shapeContext.textBaseline = 'middle'; shapeContext.textAlign = 'center'; }
         function processCanvas() {
             var pixels = shapeContext.getImageData(0, 0, shapeCanvas.width, shapeCanvas.height).data; var dots = [], x = 0, y = 0, fx = shapeCanvas.width, fy = shapeCanvas.height, w = 0, h = 0;
             for (var p = 0; p < pixels.length; p += (4 * gap)) {
@@ -300,21 +295,19 @@
       const lineHeights = [];
       const fonts = [];
 
-      // Calculate perfect sizes for each line to fit on screen without overlap
       LINES.forEach(line => {
         let size = Math.min(W * 0.09, 55); 
         fwCtx.font = `900 ${size}px "Arial Rounded MT Bold", "Montserrat", "Segoe UI", sans-serif`;
         let width = fwCtx.measureText(line).width;
         if (width > W * 0.9) {
-          size = size * ((W * 0.9) / width); // Force line to fit inside screen
+          size = size * ((W * 0.9) / width);
         }
         fonts.push(`900 ${size}px "Arial Rounded MT Bold", "Montserrat", "Segoe UI", sans-serif`);
-        let lh = size * 1.5; // Perfect spacing between lines
+        let lh = size * 1.5; 
         lineHeights.push(lh);
         totalHeight += lh;
       });
 
-      // Start completely vertically centered
       let currentY = (H / 2) - (totalHeight / 2) + (lineHeights[0] / 2);
       let idx = 0;
       const GOLDEN_ANGLE = 137.508; 
@@ -322,7 +315,7 @@
       LINES.forEach((line, li) => {
         fwCtx.font = fonts[li];
         const totalWidth = fwCtx.measureText(line).width;
-        let cx = (W / 2) - (totalWidth / 2); // Perfectly horizontally centered
+        let cx = (W / 2) - (totalWidth / 2);
 
         [...line].forEach((char) => {
           const w = fwCtx.measureText(char).width;
@@ -333,8 +326,6 @@
           }
           cx += w;
         });
-
-        // Move cursor down for next line
         if(li < LINES.length - 1) {
             currentY += (lineHeights[li] + lineHeights[li+1]) / 2;
         }
