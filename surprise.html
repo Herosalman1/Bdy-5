@@ -7,12 +7,20 @@
 <title>Happy Birthday!</title>
 <link href="https://fonts.googleapis.com/css?family=Montserrat:700" rel="stylesheet">
 <style>
+  * {
+    box-sizing: border-box;
+  }
   html, body {
     margin: 0;
     height: 100%;
     background: radial-gradient(circle at center, #1a1a2e 0%, #06060a 100%);
     overflow: hidden;
     font-family: 'Avenir', Helvetica, sans-serif;
+    /* Text selection block karna taaki content copy na ho sake */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
   
   /* Start Screen UI */
@@ -68,7 +76,7 @@
 
   <!-- Background Music -->
   <audio id="bgMusic">
-    <source src="https://video.xx.fbcdn.net/o1/v/t2/f2/m78/AQPMp4CU9LHOXfDuFJq_Xlqvnl3YlIKiz8IHybAhQBK1bOn8rhVqAekArcU3_AkrutDeHHB4mhSjyFT33_UCIA7quq2WZEiUUu_mVpo.mp4?_nc_cat=102&_nc_oc=AdrkAMKGsoFxF3zVpHQLWe4rITuzzD0gtP8tP7gcFicFqh-Lblzw24CuV-pDNV4dj3SSMAlZXraJLhqY8mfGG8wf&_nc_sid=9ca052&_nc_ht=instagram.fdiq8-1.fna.fbcdn.net&_nc_ohc=EbkjZAssLyoQ7kNvwGNASJt&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmlnd3d3LUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMDQwOTk5MTkxOTg2MDcyLCJhc3NldF9hZ2VfZGF5cyI6MTIsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoyNiwiYml0cmF0ZSI6NzAyNzAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=tIw0Y-uqdY6y21QDVf0VXQ&_nc_ss=7ba8c&_nc_zt=28&oh=00_AQFxIQjirwwDBqr015ZWXd0WE3H8pGAE4x8EHIwR30AokQ&oe=6A8C8F3F">
+    <source src="https://video.xx.fbcdn.net/o1/v/t2/f2/m78/AQPMp4CU9LHOXfDuFJq_Xlqvnl3YlIKiz8IHybAhQBK1bOn8rhVqAekArcU3_AkrutDeHHB4mhSjyFT33_UCIA7quq2WZEiUUu_mVpo.mp4?_nc_cat=102&_nc_oc=AdrkAMKGsoFxF3zVpHQLWe4rITuzzD0gtP8tP7gcFicFqh-Lblzw24CuV-pDNV4dj3SSMAlZXraJLhqY8mfGG8wf&_nc_sid=9ca052&_nc_ht=instagram.fdiq8-1.fna.fbcdn.net&_nc_ohc=EbkjZAssLyoQ7kNvwGNASJt&efg=eyJ2ZW5jb2RlX3RhZyI6ImlnLXhwdmRzLmNsaXBzLmlnd3d3LUMzLmRhc2hfbG5faGVhYWNfdmJyM19hdWRpbyIsInZpZGVvX2lkIjpudWxsLCJvaWxfdXJsZ2VuX2FwcF9pZCI6OTM2NjE5NzQzMzkyNDU5LCJjbGllbnRfbmFtZSI6ImlnIiwieHB2X2Fzc2V0X2lkIjoxMDQwOTk5MTkxOTg2MDcyLCJhc3NldF9hZ2VfZGF5cyI6MTIsInZpX3VzZWNhc2VfaWQiOjEwMDk5LCJkdXJhdGlvbl9zIjoyNiwiYml0cmF0ZSI6NzazNzAsInVybGdlbl9zb3VyY2UiOiJ3d3cifQ%3D%3D&ccb=17-1&_nc_gid=tIw0Y-uqdY6y21QDVf0VXQ&_nc_ss=7ba8c&_nc_zt=28&oh=00_AQFxIQjirwwDBqr015ZWXd0WE3H8pGAE4x8EHIwR30AokQ&oe=6A8C8F3F">
   </audio>
 
   <!-- Start Screen -->
@@ -87,7 +95,39 @@
   <canvas id="particleCanvas" class="canvas"></canvas>
 
   <script>
-    // --- 1. AUDIO & START UI ---
+    // ----------------------------------------------------
+    // SECURITY & ANTI-INSPECT SCRIPTS (BLOCKS RIGHT CLICK & SHORTCUTS)
+    // ----------------------------------------------------
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c' || e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+            e.preventDefault();
+            return false;
+        }
+        if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    // ----------------------------------------------------
+
+    // --- 1. URL KEY & LOCALSTORAGE NAME FETCHING ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const shortKey = urlParams.get('key');
+    let friendName = "DIYA SING";
+
+    if (shortKey && localStorage.getItem(shortKey)) {
+        friendName = localStorage.getItem(shortKey);
+    }
+
+    // --- 2. AUDIO & START UI ---
     const startBtnOverlay = document.getElementById('start-btn-overlay');
     const startScreen = document.getElementById('start-screen');
     const bgAudio = document.getElementById('bgMusic');
@@ -116,7 +156,7 @@
       bgAudio.muted = !e.target.checked;
     });
 
-    // --- 2. 3D FLOOR BACKGROUND ---
+    // --- 3. 3D FLOOR BACKGROUND ---
     let fCanvas, fCtx, pi, cx, cy, playerZ, playerX, playerY, pitch, yaw, scale, frames, floorAnimId;
     function initFloorVars() {
         pi = Math.PI; fCanvas = document.getElementById("floorCanvas"); fCtx = fCanvas.getContext("2d"); 
@@ -150,7 +190,7 @@
     window.addEventListener("resize", () => { if(fCanvas){ fCanvas.width = fCanvas.clientWidth; fCanvas.height = fCanvas.clientHeight; cx = fCanvas.width / 2; cy = fCanvas.height / 2; }});
     function initFloor() { initFloorVars(); frameFloor(); }
 
-    // --- 3. PARTICLE TEXT (100% ORIGINAL SCRIPT) ---
+    // --- 4. PARTICLE TEXT (100% ORIGINAL SCRIPT) ---
     var S = {
         init: function () {
             S.Drawing.init('#particleCanvas');
@@ -263,7 +303,7 @@
         }
     }());
 
-    // --- 4. FIREWORK BALLOONS LOGIC (Properly Scaled & Spaced) ---
+    // --- 5. FIREWORK BALLOONS LOGIC (Properly Scaled & Spaced) ---
     const fwCanvas = document.getElementById('fwCanvas');
     const fwCtx = fwCanvas.getContext('2d');
     let W, H, DPR;
@@ -277,10 +317,6 @@
       fwCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
       layoutFw();
     }
-
-    const urlParams = new URLSearchParams(window.location.search);
-    let friendName = urlParams.get('name');
-    if (!friendName) friendName = "DIYA SING";
 
     const LINES = [
       "HAPPY BIRTHDAY",
